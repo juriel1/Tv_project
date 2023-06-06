@@ -1,12 +1,8 @@
 import tkinter as tk
 import tkinter.font
 import tkinter.ttk as ttk
-
-
 from ttkthemes.themed_style import ThemedStyle
-
 from back import Controller
-
 
 class app:
     def __init__(self):
@@ -16,12 +12,14 @@ class app:
         self.canvasSeason = None
         self.canvasCaps = None
         self.pathBass = None
+        self.pathSerie = None
+        self.pathSeason = None
         self.myFont = None
 
     def OnApp(self):
         Controller.MyInit(Controller)
         self.Window(self)
-        self.Style(self)
+        #self.Style(self)
         self.ScrollBarsANDCanvas(self)
         self.Buttons(self)
         self.window.mainloop()
@@ -82,76 +80,78 @@ class app:
         btnViewSeries = ttk.Button(
             self.canvasBtn,
             text="View Series",
-            command=lambda: self.GetButtons(self, Controller.GetView(Controller, self.pathBass), "View Series", ""),
+            command=lambda: self.SerieButtons(self,Controller.GetView(Controller,self.pathBass)),
         )
         btnViewSeries.grid(row=1, column=0, ipadx=60, ipady=30, padx=(0, 0), pady=(37, 37))
+    def SerieButtons(self, list):
+        y = 0
+        for i in list:
+            y +=1
+            BTN.CreateSerie(BTN,list[y-1],self.pathBass,y,self.canvasSeries,self.canvasSeason,self.canvasCaps)
 
-    def GetButtons(self, list, father: str, gFather: str):
-        if list != "1":
-            for i in range(0, len(list)):
-                if str(father)[0] == "V":
-                    if i !=0:
-                        self.canvasSeries.create_window(
-                            100, 100 * i,
-                            window=ttk.Button(
-                                self.canvasSeries, text=str("S-" + list[i]),
-                                command=lambda: self.GetButtons(self,Controller.GetView(Controller,str(self.pathBass + "/" + str(list[i]))),str(list[i]),""),
-                                width=27
-                            ))
-                    else:
-                        self.canvasSeries.create_window(
-                            100, 100 * i,
-                            window=ttk.Button(
-                                self.canvasSeries, text=str("S-" + list[i]),
-                                width=27
-                            ))
-                elif (str(father)[0] == "S"):
-                    if i !=0:
-                            self.canvasSeason.create_window(
-                            100, 100 * i,
-                            window=ttk.Button(
-                                self.canvasSeason, text=str("T-" + list[i]),
-                                command=lambda:
-                                self.GetButtons(self,Controller.GetView(Controller,str(self.pathBass + "/" + father + "/" +list[i])), list[i],str(father)),
-                                width=27
-                            ))
-                    else:
-                        self.canvasSeason.create_window(
-                            100, 100 * i,
-                            window=ttk.Button(
-                                self.canvasSeason, text=str("T-" + list[i]),
-                                width=27
-                            ))
-                elif str(father)[0] == "T":
-                    if i != 0:
-                        self.canvasCaps.create_window(
-                            100, 100 * i,
-                            window=ttk.Button(
-                                self.canvasCaps, text=str("C-" + list[i]),
-                                command=lambda:
-                                Controller.PlayASelectCap(Controller,self.pathBass + "/" + gFather + "/" + father + "/" +list[i]),
-                                width=27
-                            ))
-                    else:
-                        self.canvasCaps.create_window(
-                            100, 100 * i,
-                            window=ttk.Button(
-                                self.canvasCaps, text=str("C-" + list[i]),
-                                width=27
-                            ))
-                else:
-                    if i != 0:
-                        self.canvasSeason.create_window(
-                            100, 100 * i,
-                            window=ttk.Button(
-                                self.canvasSeason, text=str("T-" + list[i]),
-                                command=lambda:
-                                self.GetButtons(self, Controller.GetView(Controller,str(self.pathBass + "/" + str(father) + "/" + list[i])),list[i], str(father)),
-                                width=27
-                            ))
-                    else:
-                        self.canvasSeason.create_window(
-                            100, 100 * i,
-                            window=ttk.Button(
-                                self.canvasSeason, text=str("T-" + list[i]),
-                            ))
+class BTN():
+    def __int__(self):
+        self.canvasSerie = None
+        self.canvasSeason = None
+        self.canvasCap = None
+        self.pathBass = None
+        self.name = None
+        self.ypos = None
+
+
+    def CreateCap(self,name_,path_,ypos_,canvascap=tk.Canvas):
+        self.canvasCap = canvascap
+        self.name = name_
+        self.pathBass = path_
+        self.ypos = ypos_
+
+        self.canvasCap.create_window(
+            100,100*ypos_,
+            window=ttk.Button(
+                self.canvasCap,text=str("S-"+name_),
+                command=lambda : Controller.PlayASelectCap(Controller,path_),
+                width=27
+            )
+        )
+    def RolCap(self,list,path_):
+        y = 0
+        for i in list:
+            y += 1
+            BTN.CreateCap(BTN, list[y - 1],str(path_+"/"+list[y-1]), y,self.canvasCap)
+
+    def CreateSeason(self,name_,path_,ypos_,canvasseason=tk.Canvas,canvascap=tk.Canvas):
+        self.canvasSeason = canvasseason
+        self.canvasCap = canvascap
+        self.name = name_
+        self.pathBass = path_
+        self.ypos = ypos_
+
+        self.canvasSeason.create_window(
+            100,100*ypos_,
+            window=ttk.Button(
+                self.canvasSeason,text=str("S-"+name_),
+                command=lambda : self.RolCap(self,Controller.GetView(Controller,str(self.pathBass)),path_),
+                width=27
+            )
+        )
+    def RolSeason(self,list,path_):
+        y = 0
+        for i in list:
+            y += 1
+            BTN.CreateSeason(BTN, list[y - 1], str(path_+"/"+list[y-1]),y, self.canvasSeason,self.canvasCap)
+    def CreateSerie(self,name_,path_,ypos_,canvasserie = tk.Canvas,canvasseason = tk.Canvas,canvascap = tk.Canvas):
+        self.canvasSerie = canvasserie
+        self.canvasSeason = canvasseason
+        self.canvasCap = canvascap
+        self.name = name_
+        self.pathBass = path_
+        self.ypos = ypos_
+
+        self.canvasSerie.create_window(
+            100,100*self.ypos,
+            window=ttk.Button(
+                self.canvasSerie,text=str("S-"+name_),
+                command=lambda : self.RolSeason(self,Controller.GetView(Controller,str(self.pathBass+"/"+name_)),str(self.pathBass+"/"+name_)),
+                width=27
+            )
+        )

@@ -3,7 +3,6 @@ import random
 from moviepy.editor import VideoFileClip
 from threading import Timer
 
-
 class Controller:
 
     def __init__(self):
@@ -53,6 +52,7 @@ class Controller:
     def PlayASelectCap(self, path: str):
         print("ahora")
         p = str(path)
+        print(p)
         if p.find(" ") != -1:
             p = p.replace(" ", "")
             os.rename(path, p)
